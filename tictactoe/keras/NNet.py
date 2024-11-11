@@ -7,6 +7,7 @@ import numpy as np
 import math
 import sys
 sys.path.append('..')
+import torch
 from utils import *
 from NeuralNet import NeuralNet
 
@@ -41,7 +42,7 @@ class NNetWrapper(NeuralNet):
         """
         examples: list of examples, each example is of form (board, pi, v)
         """
-        input_boards, target_pis, target_vs = list(zip(*examples))
+        input_boards, target_pis, target_vs, _= list(zip(*examples))
         input_boards = np.asarray(input_boards)
         target_pis = np.asarray(target_pis)
         target_vs = np.asarray(target_vs)
@@ -84,3 +85,29 @@ class NNetWrapper(NeuralNet):
         if not os.path.exists(filepath):
             raise ValueError("No model in path '{}'".format(filepath))
         self.nnet.model.load_weights(filepath)
+    def initial_inference(self, board):
+        """
+        MuZero initial inference - converts AlphaZero's predict() to MuZero format
+        """
+        if isinstance(board, torch.Tensor):
+            board = board.numpy()
+        
+        pi, v = self.predict(board)
+        # For TicTacToe, we don't need a hidden state, so return None
+        hidden_state = None
+        return pi, v, hidden_state
+
+    def recurrent_inference(self, hidden_state, action):
+        """
+        MuZero recurrent inference - for TicTacToe, we can just use the same prediction
+        Since hidden_state is None, we need to handle this case differently
+        """
+        # Return zeros for pi (policy) and v (value) when hidden_state is None
+        if hidden_state is None:
+            pi = np.zeros(self.action_size)
+            v = 0
+            return pi, v, hidden_state
+        
+        # Only proceed with prediction if we have a valid board state
+        pi, v = self.predict(hidden_state)
+        return pi, v, hidden_state

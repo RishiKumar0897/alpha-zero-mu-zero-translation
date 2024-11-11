@@ -2,9 +2,9 @@ import logging
 
 import coloredlogs
 
-from muzeroimplementation import Coach
+from muzeroimplementation.Coach import Coach
 from tictactoe.TicTacToeGame import TicTacToeGame as Game
-from tictactoe.keras.NNet import NNetWrapper as nn
+from tictactoe.pytorch.NNetWrapper import NNetWrapper as nn
 from utils import *
 
 
@@ -13,8 +13,8 @@ log = logging.getLogger(__name__)
 coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
 
 args = dotdict({
-    'numIters': 1000,
-    'numEps': 100,              # Number of complete self-play games to simulate during a new iteration.
+    'numIters': 10,
+    'numEps': 50,              # Number of complete self-play games to simulate during a new iteration.
     'tempThreshold': 15,        #
     'updateThreshold': 0.6,     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
     'maxlenOfQueue': 200000,    # Number of game examples to train the neural networks.

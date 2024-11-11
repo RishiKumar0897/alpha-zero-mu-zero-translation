@@ -5,7 +5,7 @@ from pickle import Pickler, Unpickler
 from random import shuffle
 import numpy as np
 from tqdm import tqdm
-from muzeroimplementation import MCTS
+from muzeroimplementation.MCTS import MCTS
 
 log = logging.getLogger(__name__)
 
@@ -17,6 +17,7 @@ class Coach:
         self.network = network
         self.args = args
         self.mcts = MCTS(game, network, args)
+        # MuZero specific: We'll need to track hidden states for the dynamics function
         self.trainExamplesHistory = []  # History of training examples
         self.skipFirstSelfPlay = False  # Override in loadTrainExamples()
 
@@ -26,6 +27,7 @@ class Coach:
         board = self.game.getInitBoard()
         self.curPlayer = 1
         episodeStep = 0
+        # MuZero specific: Initialize hidden state to None at start of episode
         hidden_state = None
 
         while True:
@@ -35,6 +37,10 @@ class Coach:
 
             pi = self.mcts.getActionProb(canonicalBoard, temp=temp)
             sym = self.game.getSymmetries(canonicalBoard, pi)
+            
+            # MuZero specific: Store hidden state in training examples
+            # In AlphaZero, the training tuple would be (board, current_player, policy, value)
+            # In MuZero, we add hidden_state to use with the dynamics function
             for b, p in sym:
                 trainExamples.append([b, self.curPlayer, p, None, hidden_state])
 
@@ -64,6 +70,7 @@ class Coach:
             self.saveTrainExamples(i - 1)
             trainExamples = [e for ex in self.trainExamplesHistory for e in ex]
             shuffle(trainExamples)
+            print("Training example structure:", trainExamples[0] if trainExamples else "No examples")
 
             self.network.train(trainExamples)
             self.network.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
