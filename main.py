@@ -2,7 +2,7 @@ import logging
 
 import coloredlogs
 
-from Coach import Coach
+from muzeroimplementation import Coach
 from tictactoe.TicTacToeGame import TicTacToeGame as Game
 from tictactoe.keras.NNet import NNetWrapper as nn
 from utils import *

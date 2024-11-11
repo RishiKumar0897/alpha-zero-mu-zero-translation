@@ -12,7 +12,7 @@ from NeuralNet import NeuralNet
 import torch
 import torch.optim as optim
 
-from .TicTacToeNNet import TicTacToeNNet as tnnet
+from muzeroimplementation import TicTacToeNNet as tnnet
 
 args = dotdict({
     'lr': 0.001,
